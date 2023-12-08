@@ -1,0 +1,156 @@
+{
+  "name": "ljspeech_fastspeech2_test",
+  "n_gpu": 1,
+  "preprocessing": {
+      "spectrogram": {
+          "type": "MelSpectrogram",
+          "args": {}
+      },
+      "load_dataset": false,
+      "preprocess_wavs": false,
+      "perform_preprocessing": false,
+      "use_pitch_spectrogram": false,
+      "pitch_energy_normalization": true,
+      "sr": 22050,
+      "max_wav_value": 32768.0,
+      "hop_size": 256,
+      "val_size": 0.1,
+      "random_state": 42,
+      "STFT": {
+          "filter_length": 1024,
+          "hop_length": 256,
+          "win_length": 1024,
+          "sampling_rate": 22050,
+          "n_mel_channels": 80
+      },
+      "mfa": {
+          "perform": false,
+          "download": false,
+          "bin_path": "",
+          "pretrained_model_path": "",
+          "mfa_alignments_path": "/home/jupyter/work/resources/dla2023-tts/TextGrid/LJSpeech"
+      },
+      "log_spec": true
+  },
+  "augmentations": {
+      "wave": [],
+      "spectrogram": []
+  },
+  "model": {
+      "type": "FastSpeech2",
+      "args": {
+          "data_dir": "/home/jupyter/work/resources/dla2023-tts/data/datasets/ljspeech/data",
+          "variance_adaptor": {
+              "num_bins": 256,
+              "quantization_log_scaling": false,
+              "pitch_quantization": true,
+              "energy_quantization": true,
+              "pitch_energy_stats": {
+                  "pitch": {
+                      "min": -2.9029153696148327,
+                      "max": 12.872838334471972
+                  },
+                  "energy": {
+                      "min": -1.1383792129971702,
+                      "max": 25.36056593542059
+                  }
+              }
+          },
+          "encoder_decoder": {
+              "max_seq_len": 1000,
+              "vocab_size": 400,
+              "fft_conv1d_kernel": [
+                  9,
+                  1
+              ],
+              "fft_conv1d_padding": [
+                  4,
+                  0
+              ],
+              "encoder_layer": 4,
+              "encoder_head": 2,
+              "encoder_dim": 256,
+              "encoder_conv1d_filter_size": 1024,
+              "encoder_dropout": 0.2,
+              "decoder_layer": 4,
+              "decoder_head": 2,
+              "decoder_dim": 256,
+              "decoder_conv1d_filter_size": 1024,
+              "decoder_dropout": 0.2,
+              "pad_idx": 0
+          },
+          "variance_predictor": {
+              "filter_size": 256,
+              "kernel_size": 3,
+              "dropout": 0.1
+          },
+          "n_mel_channels": 80
+      }
+  },
+  "data": {
+      "train": {
+          "batch_size": 10,
+          "num_workers": 5,
+          "inference_path": "/home/jupyter/work/resources/dla2023-tts/data/datasets/ljspeech/inference",
+          "waveglow_path": "/home/jupyter/work/resources/dla2023-tts/waveglow/pretrained_model/waveglow_256channels.pt",
+          "datasets": [
+              {
+                  "type": "LJspeechFastSpeech2Dataset",
+                  "args": {
+                      "raw_data_dir": "/home/jupyter/work/resources/dla2023-tts/data/datasets/ljspeech/raw_data",
+                      "data_dir": "/home/jupyter/work/resources/dla2023-tts/data/datasets/ljspeech/data"
+                  }
+              }
+          ]
+      },
+      "val": {
+          "batch_size": 10,
+          "num_workers": 5,
+          "inference_path": "/home/jupyter/work/resources/dla2023-tts/data/datasets/ljspeech/inference",
+          "waveglow_path": "/home/jupyter/work/resources/dla2023-tts/waveglow/pretrained_model/waveglow_256channels.pt",
+          "datasets": [
+              {
+                  "type": "LJspeechFastSpeech2Dataset",
+                  "args": {
+                      "raw_data_dir": "/home/jupyter/work/resources/dla2023-tts/data/datasets/ljspeech/raw_data",
+                      "data_dir": "/home/jupyter/work/resources/dla2023-tts/data/datasets/ljspeech/data",
+                      "train": false
+                  }
+              }
+          ]
+      }
+  },
+  "optimizer": {
+      "type": "Adam",
+      "args": {
+          "lr": 0.001
+      }
+  },
+  "loss": {
+      "type": "FastSpeech2Loss",
+      "args": {}
+  },
+  "metrics": [],
+  "lr_scheduler": {
+      "type": "OneCycleLR",
+      "args": {
+          "epochs": 100,
+          "steps_per_epoch": 1000,
+          "max_lr": 0.001,
+          "pct_start": 0.2
+      }
+  },
+  "trainer": {
+      "epochs": 100,
+      "save_dir": "saved/",
+      "save_period": 5,
+      "verbosity": 2,
+      "monitor": "min loss",
+      "early_stop": 100,
+      "visualize": "wandb",
+      "wandb_project": "tts_project",
+      "wandb_run_name": "onecyclelr",
+      "len_epoch": 1000,
+      "grad_norm_clip": 10
+  }
+}

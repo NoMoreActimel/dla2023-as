@@ -1,0 +1,114 @@
+{
+    "name": "librispeech_spexplus_large_kaggle",
+    "n_gpu": 1,
+    "preprocessing": {
+      "sr": 16000,
+      "spectrogram": {
+        "type": "MelSpectrogram",
+        "args": {
+        }
+      },
+      "log_spec": true
+    },
+    "augmentations": {
+      "wave": [],
+      "spectrogram": []
+    },
+    "arch": {
+      "type": "SpExPlusModel",
+      "args": {
+        "L1": 40,
+        "L2": 160,
+        "L3": 320,
+        "n_filters": 512,
+        "encoder_out_dim": 512,
+        "speaker_encoder_hidden_dim": 1024,
+        "speaker_embedding_dim": 512,
+        "tcn_conv_channels": 1024
+      }
+    },
+    "data": {
+      "train": {
+        "batch_size": 4,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "LibrispeechMixedDataset",
+            "args": {
+              "part": "train-clean-100",
+              "data_dir": "/kaggle/input/librispeech/train-clean-100/LibriSpeech",
+              "data_mixed_dir": "/kaggle/working/dla2023-ss/data/librispeech-mixed",
+              "data_write_dir": "/kaggle/working/dla2023-ss/data/librispeech-index",
+              "mixer_audio_length": 4,
+              "snr_levels": [0, 5]
+            }
+          }
+        ]
+      },
+      "val": {
+        "batch_size": 4,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "LibrispeechMixedDataset",
+            "args": {
+              "part": "test-clean",
+              "data_dir": "/kaggle/input/librispeech/test-clean/LibriSpeech",
+              "data_mixed_dir": "/kaggle/working/dla2023-ss/data/librispeech-mixed",
+              "data_write_dir": "/kaggle/working/dla2023-ss/data/librispeech-index",
+              "mixer_audio_length": 4,
+              "snr_levels": [0, 5]
+            }
+          }
+        ]
+      }
+    },
+    "optimizer": {
+      "type": "Adam",
+      "args": {
+        "lr": 1e-3
+      }
+    },
+    "loss": {
+      "type": "SpExPlusLoss",
+      "args": {
+        "gamma": 0.5
+      }
+    },
+    "metrics": [
+      {
+        "type": "SiSDRMetric",
+        "args": {
+          "name": "Si SDR"
+        }
+      },
+      {
+        "type": "PESQMetric",
+        "args": {
+          "name": "PESQ",
+          "fs": 16000,
+          "mode": "wb"
+        }
+      }
+    ],
+    "lr_scheduler": {
+      "type": "ReduceLROnPlateau",
+      "args": {
+        "factor": 0.5,
+        "patience": 2
+      }
+    },
+    "trainer": {
+      "epochs": 50,
+      "save_dir": "saved/",
+      "save_period": 5,
+      "verbosity": 2,
+      "monitor": "min val_loss",
+      "early_stop": 100,
+      "visualize": "wandb",
+      "wandb_project": "ss_project",
+      "wandb_run_name": "doubled_whole_model_LR_Plateu",
+      "len_epoch": 100,
+      "grad_norm_clip": 10
+    }
+  }

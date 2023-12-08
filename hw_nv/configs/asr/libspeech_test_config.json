@@ -1,0 +1,126 @@
+{
+    "name": "librispeech_deepspeech2_hidden_1024_test-clean",
+    "n_gpu": 1,
+    "preprocessing": {
+      "sr": 16000,
+      "spectrogram": {
+        "type": "MelSpectrogram",
+        "args": {
+        }
+      },
+      "log_spec": true
+    },
+    "augmentations": {
+      "wave": [],
+      "spectrogram": [
+        {
+          "type": "FreqMaskingSpecAug",
+          "args": {
+            "prob": 0.4,
+            "max_freq_mask": 20
+          }
+        },
+        {
+          "type": "TimeMaskingSpecAug",
+          "args": {
+            "prob": 0.4,
+            "max_time_mask": 100
+          }
+        },
+        {
+          "type": "TimeStretchSpecAug",
+          "args": {
+            "prob": 0.4,
+            "stretch_min": 0.8,
+            "stretch_max": 1.2,
+            "n_freq": 128
+          }
+        }
+      ]
+    },
+    "arch": {
+      "type": "DeepSpeech2Model",
+      "args": {
+        "n_feats": 128,
+        "mel_spectrogram": true,
+        "rnn_hidden_size": 512
+      }
+    },
+    "data": {
+        "test": {
+            "batch_size": 24,
+            "num_workers": 5,
+            "datasets": [
+                {
+                    "type": "LibrispeechDataset",
+                    "args": {
+                        "part": "test-clean",
+                        "data_dir": "/kaggle/input/librispeech/test-clean/LibriSpeech",
+                        "data_write_dir": "/kaggle/working/dla2023-asr/data/librispeech-index"
+                    }
+                }
+            ]
+        }
+    },
+    "optimizer": {
+      "type": "Adam",
+      "args": {
+        "lr": 3e-4
+      }
+    },
+    "loss": {
+      "type": "CTCLoss",
+      "args": {}
+    },
+    "metrics": [
+      {
+        "type": "ArgmaxWERMetric",
+        "args": {
+          "name": "WER (argmax)"
+        }
+      },
+      {
+        "type": "ArgmaxCERMetric",
+        "args": {
+          "name": "CER (argmax)"
+        }
+      }
+    ],
+    "rare_eval_metrics": {
+      "n_epochs_frequency": 20,
+      "metrics": [
+        {
+          "type": "BeamsearchWERMetric",
+          "args": {
+            "name": "WER (beamsearch)"
+          }
+        },
+        {
+          "type": "BeamsearchCERMetric",
+          "args": {
+            "name": "CER (beamsearch)"
+          }
+        }
+      ]
+    },
+    "text_encoder": {
+      "type": "CTCCharTextEncoder",
+      "args": {
+        "beam_size": 3,
+        "use_lm": true
+      }
+    },
+    "lr_scheduler": {
+      "type": "CosineAnnealingWarmRestarts",
+      "args": {
+        "eta_min": 3e-5,
+        "T_0": 2000
+      }
+    },
+    "test": {
+      "verbosity": 2,
+      "visualize": "wandb",
+      "wandb_project": "asr_project",
+      "wandb_run_name": "ls_ds2_1042_test_clean"
+    }
+  }

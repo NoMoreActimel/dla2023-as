@@ -1,0 +1,152 @@
+{
+    "name": "ljspeech_hifigan_test",
+    "n_gpu": 1,
+    "preprocessing": {
+      "load_dataset": false,
+      "preprocess_wavs": false,
+      "generate_mels": false,
+      "max_wav_length": 16384,
+      "mel_spec_config": {
+        "sr": 22050,
+        "win_length": 1024,
+        "hop_length": 256,
+        "n_fft": 1024,
+        "f_min": 0,
+        "f_max": 8000,
+        "n_mels": 80,
+        "power": 1.0,
+        "pad_value": -11.5129251
+      }
+    },
+    "augmentations": {
+      "wave": [],
+      "spectrogram": []
+    },
+    "model": {
+      "type": "HiFiGAN",
+      "args": {
+        "generator": {
+          "in_channels": 80,
+          "out_channels": 1,
+          "hidden_channels": 512,
+          "binding_conv_kernel_size": 7,
+          "upsample_strides": [8, 8, 2, 2],
+          "MRF": {
+            "kernels": [3, 7, 11],
+            "dilations": [[1, 3, 5], [1, 3, 5], [1, 3, 5]]
+          },
+          "apply_weight_norm": true
+        },
+        "period_discriminator": {
+          "in_channels": 1,
+          "out_channels": 1,
+          "hidden_channels": [32, 128, 512, 1024, 1024],
+          "kernel_size": 5,
+          "strides": [3, 3, 3, 3, 1],
+          "out_kernel_size": 3,
+          "apply_weight_norm": true
+        },
+        "scale_discriminator": {
+          "in_channels": 1,
+          "out_channels": 1,
+          "hidden_channels": [128, 128, 256, 512, 1024, 1024, 1024],
+          "kernel_sizes": [15, 41, 41, 41, 41, 41, 5],
+          "strides": [1, 2, 2, 4, 4, 1, 1],
+          "groups": [1, 4, 16, 16, 16, 16, 1],
+          "out_kernel_size": 3,
+          "pooling": {
+            "kernel_size": 4,
+            "stride": 2,
+            "padding": 2
+          }
+        }
+      }
+    },
+    "data": {
+      "train": {
+        "batch_size": 16,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "LJspeechMelDataset",
+            "args": {
+              "raw_data_dir": "/content/dla2023-nv/data/datasets/ljspeech/raw_data",
+              "data_dir": "/content/dla2023-nv/data/datasets/ljspeech/data"
+            }
+          }
+        ]
+      },
+      "val": {
+        "batch_size": 16,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "LJspeechMelDataset",
+            "args": {
+              "raw_data_dir": "/content/dla2023-nv/data/datasets/ljspeech/raw_data",
+              "data_dir": "/content/dla2023-nv/data/datasets/ljspeech/data",
+              "train": false
+            }
+          }
+        ]
+      }
+    },
+    "optimizer": {
+      "generator": {
+        "type": "AdamW",
+        "args": {
+            "lr": 2e-4,
+            "weight_decay": 0.01,
+            "betas": [0.8, 0.99]
+        }
+      },
+      "discriminator": {
+        "type": "AdamW",
+        "args": {
+            "lr": 2e-4,
+            "weight_decay": 0.01,
+            "betas": [0.8, 0.99]
+        }
+      }
+    },
+    "loss": {
+      "generator": {
+        "type": "HiFiGANGeneratorLoss",
+        "args": {
+          "alpha_fm_loss": 2,
+          "alpha_mel_loss": 45
+        }
+      },
+      "discriminator": {
+        "type": "HiFiGANDiscriminatorLoss",
+        "args": {}
+      }
+    },
+    "metrics": [],
+    "lr_scheduler": {
+      "generator": {
+        "type": "ExponentialLR",
+        "args": {
+          "gamma": 0.999
+        }
+      },
+      "discriminator": {
+        "type": "ExponentialLR",
+        "args": {
+          "gamma": 0.999
+        }
+      }
+    },
+    "trainer": {
+      "epochs": 5000,
+      "save_dir": "saved/",
+      "save_period": 5,
+      "verbosity": 2,
+      "monitor": "min loss",
+      "early_stop": 100,
+      "visualize": "wandb",
+      "wandb_project": "hifigan_project",
+      "wandb_run_name": "baseline_test_run",
+      "len_epoch": 200
+    }
+  }
