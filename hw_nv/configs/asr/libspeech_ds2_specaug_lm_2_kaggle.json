@@ -1,4 +1,4 @@
-%%writefile ./hw_nv/configs/libspeech_ds2_specaug_lm_2.json
+%%writefile ./hw_as/configs/libspeech_ds2_specaug_lm_2.json
 {
   "name": "librispeech_deepspeech2_specaug_lm_finetune_clean360",
   "n_gpu": 1,

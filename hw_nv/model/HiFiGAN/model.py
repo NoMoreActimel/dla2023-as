@@ -3,9 +3,9 @@ import torch
 
 from torch import nn
 
-from hw_nv.model.HiFiGAN.generator import Generator
-from hw_nv.model.HiFiGAN.period_discriminator import MultiPeriodDiscriminator
-from hw_nv.model.HiFiGAN.scale_discriminator import MultiScaleDiscriminator
+from hw_as.model.HiFiGAN.generator import Generator
+from hw_as.model.HiFiGAN.period_discriminator import MultiPeriodDiscriminator
+from hw_as.model.HiFiGAN.scale_discriminator import MultiScaleDiscriminator
 
 
 class HiFiGANModel(nn.Module):

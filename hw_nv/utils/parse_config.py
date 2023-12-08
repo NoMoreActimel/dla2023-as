@@ -7,11 +7,11 @@ from functools import reduce, partial
 from operator import getitem
 from pathlib import Path
 
-from hw_nv import text_encoder as text_encoder_module
-from hw_nv.base.base_text_encoder import BaseTextEncoder
-from hw_nv.logger import setup_logging
-from hw_nv.text_encoder import CTCCharTextEncoder
-from hw_nv.utils import read_json, write_json, ROOT_PATH
+from hw_as import text_encoder as text_encoder_module
+from hw_as.base.base_text_encoder import BaseTextEncoder
+from hw_as.logger import setup_logging
+from hw_as.text_encoder import CTCCharTextEncoder
+from hw_as.utils import read_json, write_json, ROOT_PATH
 
 
 class ConfigParser:
@@ -161,13 +161,13 @@ class ConfigParser:
 
     @classmethod
     def get_default_configs(cls):
-        config_path = ROOT_PATH / "hw_nv" / "config.json"
+        config_path = ROOT_PATH / "hw_as" / "config.json"
         with config_path.open() as f:
             return cls(json.load(f))
 
     @classmethod
     def get_test_configs(cls):
-        config_path = ROOT_PATH / "hw_nv" / "tests" / "config.json"
+        config_path = ROOT_PATH / "hw_as" / "tests" / "config.json"
         with config_path.open() as f:
             return cls(json.load(f))
 

@@ -2,7 +2,7 @@ import torch
 from torch import Tensor
 from torchmetrics.audio.pesq import PerceptualEvaluationSpeechQuality
 
-from hw_nv.base.base_metric import BaseMetric
+from hw_as.base.base_metric import BaseMetric
 
 class PESQMetricWrapper(BaseMetric):
     def __init__(self, fs, mode, *args, **kwargs):

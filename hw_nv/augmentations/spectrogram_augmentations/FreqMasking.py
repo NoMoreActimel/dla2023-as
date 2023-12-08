@@ -3,7 +3,7 @@ import torchaudio
 from torch import Tensor
 from torch import nn
 
-from hw_nv.augmentations.base import AugmentationBase
+from hw_as.augmentations.base import AugmentationBase
 
 class FreqMaskingSpecAug(AugmentationBase):
     def __init__(self, prob=0.5, max_freq_mask=20, *args, **kwargs):

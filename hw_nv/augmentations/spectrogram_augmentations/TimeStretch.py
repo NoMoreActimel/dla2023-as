@@ -4,7 +4,7 @@ import torchaudio
 from torch import Tensor
 from torch import nn
 
-from hw_nv.augmentations.base import AugmentationBase
+from hw_as.augmentations.base import AugmentationBase
 
 class TimeStretchSpecAug(AugmentationBase):
     def __init__(

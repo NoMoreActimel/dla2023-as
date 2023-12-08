@@ -1,9 +1,9 @@
 from typing import List, Callable
 
-import hw_nv.augmentations.spectrogram_augmentations
-import hw_nv.augmentations.wave_augmentations
-from hw_nv.augmentations.sequential import SequentialAugmentation
-from hw_nv.utils.parse_config import ConfigParser
+import hw_as.augmentations.spectrogram_augmentations
+import hw_as.augmentations.wave_augmentations
+from hw_as.augmentations.sequential import SequentialAugmentation
+from hw_as.utils.parse_config import ConfigParser
 
 
 def from_configs(configs: ConfigParser):
@@ -11,14 +11,14 @@ def from_configs(configs: ConfigParser):
     if "augmentations" in configs.config and "wave" in configs.config["augmentations"]:
         for aug_dict in configs.config["augmentations"]["wave"]:
             wave_augs.append(
-                configs.init_obj(aug_dict, hw_nv.augmentations.wave_augmentations)
+                configs.init_obj(aug_dict, hw_as.augmentations.wave_augmentations)
             )
 
     spec_augs = []
     if "augmentations" in configs.config and "spectrogram" in configs.config["augmentations"]:
         for aug_dict in configs.config["augmentations"]["spectrogram"]:
             spec_augs.append(
-                configs.init_obj(aug_dict, hw_nv.augmentations.spectrogram_augmentations)
+                configs.init_obj(aug_dict, hw_as.augmentations.spectrogram_augmentations)
             )
     return _to_function(wave_augs), _to_function(spec_augs)
 

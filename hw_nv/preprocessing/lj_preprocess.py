@@ -6,8 +6,8 @@ import shutil
 from scipy.io import wavfile
 from speechbrain.utils.data_utils import download_file
 
-from hw_nv.utils.text import _clean_text
-from hw_nv.utils import ROOT_PATH
+from hw_as.utils.text import _clean_text
+from hw_as.utils import ROOT_PATH
 
 URL_LINKS = {
     "dataset": "https://data.keithito.com/data/speech/LJSpeech-1.1.tar.bz2", 

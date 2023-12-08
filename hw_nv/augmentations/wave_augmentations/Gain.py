@@ -2,7 +2,7 @@ import numpy as np
 import torch_audiomentations
 from torch import Tensor
 
-from hw_nv.augmentations.base import AugmentationBase
+from hw_as.augmentations.base import AugmentationBase
 
 
 class Gain(AugmentationBase):

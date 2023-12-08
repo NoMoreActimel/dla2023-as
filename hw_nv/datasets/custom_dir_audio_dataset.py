@@ -1,7 +1,7 @@
 import logging
 from pathlib import Path
 
-from hw_nv.datasets.custom_audio_dataset import CustomAudioDataset
+from hw_as.datasets.custom_audio_dataset import CustomAudioDataset
 
 logger = logging.getLogger(__name__)
 

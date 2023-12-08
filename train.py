@@ -7,13 +7,13 @@ import torch
 
 from itertools import chain
 
-import hw_nv.loss as module_loss
-import hw_nv.metric as module_metric
-import hw_nv.model as module_arch
-from hw_nv.trainer import Trainer
-from hw_nv.utils import prepare_device
-from hw_nv.utils.object_loading import get_dataloaders
-from hw_nv.utils.parse_config import ConfigParser
+import hw_as.loss as module_loss
+import hw_as.metric as module_metric
+import hw_as.model as module_arch
+from hw_as.trainer import Trainer
+from hw_as.utils import prepare_device
+from hw_as.utils.object_loading import get_dataloaders
+from hw_as.utils.parse_config import ConfigParser
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

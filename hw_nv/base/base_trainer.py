@@ -3,8 +3,8 @@ from abc import abstractmethod
 import torch
 from numpy import inf
 
-from hw_nv.base import BaseModel
-from hw_nv.logger import get_visualizer
+from hw_as.base import BaseModel
+from hw_as.logger import get_visualizer
 
 
 class BaseTrainer:

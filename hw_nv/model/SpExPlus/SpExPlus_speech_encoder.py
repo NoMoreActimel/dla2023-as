@@ -1,7 +1,7 @@
 import torch
 from torch import nn
 
-from hw_nv.base import BaseModel
+from hw_as.base import BaseModel
 
 class SpExPlusTwinSpeechEncoder(BaseModel):
     def __init__(

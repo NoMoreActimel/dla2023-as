@@ -12,11 +12,11 @@ from speechbrain.utils.data_utils import download_file
 from torch.nn.utils.rnn import pad_sequence
 from tqdm import tqdm
 
-from hw_nv.base.base_dataset import BaseDataset
-from hw_nv.datasets.nv.mel_generation import MelSpectrogram, MelSpectrogramConfig
-from hw_nv.datasets.nv.preprocess import preprocess_wavs_and_texts, preprocess_mels
-from hw_nv.utils.text import text_to_sequence
-from hw_nv.utils import ROOT_PATH
+from hw_as.base.base_dataset import BaseDataset
+from hw_as.datasets.nv.mel_generation import MelSpectrogram, MelSpectrogramConfig
+from hw_as.datasets.nv.preprocess import preprocess_wavs_and_texts, preprocess_mels
+from hw_as.utils.text import text_to_sequence
+from hw_as.utils import ROOT_PATH
 
 logger = logging.getLogger(__name__)
 

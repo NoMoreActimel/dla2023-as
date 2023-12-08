@@ -5,9 +5,9 @@ from torch import Tensor
 
 import numpy as np
 
-from hw_nv.base.base_metric import BaseMetric
-from hw_nv.base.base_text_encoder import BaseTextEncoder
-from hw_nv.metric.utils import calc_wer
+from hw_as.base.base_metric import BaseMetric
+from hw_as.base.base_text_encoder import BaseTextEncoder
+from hw_as.metric.utils import calc_wer
 
 
 class ArgmaxWERMetric(BaseMetric):

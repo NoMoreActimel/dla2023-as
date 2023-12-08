@@ -3,7 +3,7 @@ import torchaudio
 from torch import Tensor
 from torch import nn
 
-from hw_nv.augmentations.base import AugmentationBase
+from hw_as.augmentations.base import AugmentationBase
 
 class TimeMaskingSpecAug(AugmentationBase):
     def __init__(self, prob=0.5, max_time_mask=100, *args, **kwargs):

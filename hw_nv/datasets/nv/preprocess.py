@@ -6,7 +6,7 @@ import numpy as np
 import os
 import torch
 
-from hw_nv.utils.text import _clean_text
+from hw_as.utils.text import _clean_text
 
 
 def preprocess_wavs_and_texts(raw_data_dir, data_dir, sample_rate, max_wav_length):

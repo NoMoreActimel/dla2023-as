@@ -2,7 +2,7 @@ import torch
 
 from torch import nn
 
-from hw_nv.model.HiFiGAN.utils import get_padding
+from hw_as.model.HiFiGAN.utils import get_padding
 
 
 class MultiScaleDiscriminator(nn.Module):

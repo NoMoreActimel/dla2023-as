@@ -6,7 +6,7 @@ from typing import List, Union
 import numpy as np
 from torch import Tensor
 
-from hw_nv.base.base_text_encoder import BaseTextEncoder
+from hw_as.base.base_text_encoder import BaseTextEncoder
 
 
 class CharTextEncoder(BaseTextEncoder):

@@ -13,9 +13,9 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torchvision.transforms import ToTensor
 from tqdm import tqdm
 
-from hw_nv.base import BaseTrainer
-from hw_nv.logger.utils import plot_spectrogram_to_buf
-from hw_nv.utils import inf_loop, MetricTracker
+from hw_as.base import BaseTrainer
+from hw_as.logger.utils import plot_spectrogram_to_buf
+from hw_as.utils import inf_loop, MetricTracker
 from inference import run_inference
 
 

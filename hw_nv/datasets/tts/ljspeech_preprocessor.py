@@ -15,8 +15,8 @@ from sklearn.model_selection import train_test_split
 from speechbrain.utils.data_utils import download_file
 from tqdm import tqdm
 
-from hw_nv.utils.audio.tools import AudioTools
-from hw_nv.utils.text import _clean_text
+from hw_as.utils.audio.tools import AudioTools
+from hw_as.utils.text import _clean_text
 
 URL_LINKS = {
     "mfa_alignments": "https://drive.google.com/file/d/1ukb8o-SnqhXCxq7drI3zye3tZdrGvQDA/view?usp=drive_link", 

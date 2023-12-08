@@ -6,7 +6,7 @@ import multiprocessing
 import torch
 
 from .char_text_encoder import CharTextEncoder
-from hw_nv.utils import ROOT_PATH
+from hw_as.utils import ROOT_PATH
 
 
 class Hypothesis(NamedTuple):

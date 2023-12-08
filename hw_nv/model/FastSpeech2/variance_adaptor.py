@@ -7,7 +7,7 @@ from torch import nn
 
 from .length_regulator import LengthRegulator
 from .variance_predictor import VariancePredictor
-from hw_nv.utils import ROOT_PATH
+from hw_as.utils import ROOT_PATH
 
 
 class VarianceAdaptor(nn.Module):

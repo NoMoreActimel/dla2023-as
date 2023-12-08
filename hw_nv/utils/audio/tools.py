@@ -5,7 +5,7 @@ import numpy as np
 from scipy.io.wavfile import read
 from scipy.io.wavfile import write
 
-import hw_nv.utils.audio.stft as stft
+import hw_as.utils.audio.stft as stft
 from .audio_processing import griffin_lim
 
 

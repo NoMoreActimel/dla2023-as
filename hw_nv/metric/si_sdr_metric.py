@@ -2,7 +2,7 @@ import torch
 from torch import Tensor
 from torchmetrics.audio import ScaleInvariantSignalDistortionRatio
 
-from hw_nv.base.base_metric import BaseMetric
+from hw_as.base.base_metric import BaseMetric
 
 class SiSDRMetricWrapper(BaseMetric):
     def __init__(self, *args, **kwargs):
