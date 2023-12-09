@@ -63,6 +63,11 @@ class Trainer(BaseTrainer):
             *[m.name for m in self.metrics if self._compute_on_train(m)],
             writer=self.writer
         )
+        self.val_metrics = MetricTracker(
+            "loss",
+            *[m.name for m in self.metrics],
+            writer=self.writer
+        )
 
     @staticmethod
     def _compute_on_train(metric):
@@ -133,7 +138,7 @@ class Trainer(BaseTrainer):
 
                 self.writer.add_scalar("learning rate", last_lr)
                 
-                self._log_audio(batch["predict"], "bonifide generated")
+                self._log_scalars(batch["predict"], "bonifide_predict")
                 self._log_audio(batch["wav"].squeeze(1)[0], "audio")
                 self._log_scalars(self.train_metrics)
                 # we don't want to reset train metrics at the start of every epoch
@@ -151,6 +156,33 @@ class Trainer(BaseTrainer):
         log = last_train_metrics
         return log
 
+    def _evaluation_epoch(self, epoch):
+        """
+        Validate after training an epoch
+
+        :param epoch: Integer, current training epoch.
+        :return: A log that contains information about validation
+        """
+        self.model.eval()
+        self.evaluation_metrics.reset()
+
+        with torch.no_grad():
+            for batch_idx, batch in tqdm(enumerate(self.val_dataloader), desc="val", total=self.len_epoch):
+                batch = self.process_batch(
+                    batch, is_train=False, metrics_tracker=self.val_metrics
+                )
+
+        self.writer.set_step(epoch * self.len_epoch, "val")
+        self._log_scalars(self.val_metrics)
+        self._log_audio(batch["wav"].squeeze(1)[0], "val_audio")
+
+        # add histogram of model parameters to the tensorboard
+        for name, p in self.model.named_parameters():
+            self.writer.add_histogram(name, p, bins="auto")
+        
+        return self.val_metrics.result()
+
+
     def process_batch(self, batch, is_train: bool, metrics_tracker: MetricTracker):
         batch = self.move_batch_to_device(batch, self.device)
 
@@ -160,14 +192,14 @@ class Trainer(BaseTrainer):
             self.optimizer.zero_grad()
 
         batch["loss"] = self.criterion(**batch)
+        metrics_tracker.update("loss", batch["loss"])
     
         if is_train:
             batch["loss"].backward()
             self._clip_grad_norm(self.model)
             self.optimizer.step()
+            metrics_tracker.update("grad_norm", self.get_grad_norm())
         
-        metrics_tracker.update("loss", batch["loss"])
-        metrics_tracker.update("grad_norm", self.get_grad_norm())
         for met in self.metrics:
             metrics_tracker.update(met.name, met(**batch))
         

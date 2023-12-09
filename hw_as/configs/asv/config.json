@@ -75,7 +75,12 @@
         "class_weights": [1.0, 9.0]
       }
     },
-    "metrics": [],
+    "metrics": [
+      {
+        "type": "EERMetric",
+        "args": {}
+      }
+    ],
     "lr_scheduler": {
     "type": "ExponentialLR",
       "args": {
