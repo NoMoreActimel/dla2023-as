@@ -24,8 +24,8 @@ class SincFilter(nn.Module):
     def forward(self, input):
         output = input.unsqueeze(1)
         output = self.sincconv(output)
+        output = torch.abs(output)
         return self.layers(output)
-
 
 class ResBlock(nn.Module):
     def __init__(self, in_channels, out_channels, kernel_size, maxpool_kernel_size=3):

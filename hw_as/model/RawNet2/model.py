@@ -17,16 +17,16 @@ class RawNet2Model(nn.Module):
         self.gru_num_layers = model_config["GRU_num_layers"]
 
         self.sinc_filter = SincFilter(
-            out_channels=self.sinc_channels,
-            kernel_size=self.sinc_filter_length,
-            maxpool_kernel_size=3,
+            sinc_channels=self.sinc_channels,
+            sinc_filter_length=self.sinc_filter_length,
             min_low_hz=self.sinc_filter_min_low_hz,
-            min_band_hz=self.sinc_filter_min_band_hz
+            min_band_hz=self.sinc_filter_min_band_hz,
+            maxpool_kernel_size=3
         )
 
         self.resblocks = nn.Sequential(
             ResBlock(self.sinc_channels, self.channels[0], kernel_size=3),
-            ResBlock(self.channels[0], self.channels[0], kernel_size=3),
+            ResBlock(self.channels[0], self.channels[1], kernel_size=3),
             ResBlock(self.channels[1], self.channels[1], kernel_size=3),
             ResBlock(self.channels[1], self.channels[1], kernel_size=3),
             ResBlock(self.channels[1], self.channels[1], kernel_size=3),
@@ -46,8 +46,9 @@ class RawNet2Model(nn.Module):
         self.fc = nn.Linear(self.gru_hidden_size, 2)
     
     def forward(self, wav, **kwargs):
-        output = self.sinc_filter(input)
+        output = self.sinc_filter(wav)
         output = self.resblocks(output)
+        output = output.transpose(1, 2)
         gru_output, gru_hidden_state = self.gru_layers(output)
         predict = self.fc(gru_hidden_state[-1])
         return predict
