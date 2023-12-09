@@ -120,14 +120,11 @@ class Trainer(BaseTrainer):
             if batch_idx % self.log_step == 0:
                 self.writer.set_step((epoch - 1) * self.len_epoch + batch_idx)
                 self.logger.debug(
-                    "Train Epoch: {} {} Generator Loss: {:.6f}, " \
-                        "Discriminator Loss {:.6f}".format(
+                    "Train Epoch: {} {} Loss: {:.6f}".format(
                         epoch, self._progress(batch_idx),
-                        batch["generator_loss"].item(),
-                        batch["discriminator_loss"].item()
+                        batch["loss"].item()
                     )
                 )
-
 
                 if not isinstance(self.lr_scheduler, ReduceLROnPlateau):
                     last_lr = self.optimizer.param_groups[0]['lr']
