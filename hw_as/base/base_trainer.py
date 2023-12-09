@@ -150,10 +150,8 @@ class BaseTrainer:
             "arch": arch,
             "epoch": epoch,
             "state_dict": self.model.state_dict(),
-            "generator_optimizer": self.optimizer["generator"].state_dict(),
-            "discriminator_optimizer": self.optimizer["discriminator"].state_dict(),
-            "generator_lr_scheduler": self.lr_scheduler["generator"].state_dict(),
-            "discriminator_lr_scheduler": self.lr_scheduler["discriminator"].state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "lr_scheduler": self.lr_scheduler.state_dict(),
             "monitor_best": self.mnt_best,
             "config": self.config,
         }
@@ -197,10 +195,8 @@ class BaseTrainer:
                 "from that of checkpoint. Optimizer parameters not being resumed."
             )
         else:
-            self.optimizer["generator"].load_state_dict(checkpoint["generator_optimizer"])
-            self.optimizer["discriminator"].load_state_dict(checkpoint["discriminator_optimizer"])
-            self.lr_scheduler["generator"].load_state_dict(checkpoint["generator_lr_scheduler"])
-            self.lr_scheduler["discriminator"].load_state_dict(checkpoint["discriminator_lr_scheduler"])
+            self.optimizer.load_state_dict(checkpoint["optimizer"])
+            self.lr_scheduler.load_state_dict(checkpoint["lr_scheduler"])
 
         self.logger.info(
             "Checkpoint loaded. Resume training from epoch {}".format(self.start_epoch)
