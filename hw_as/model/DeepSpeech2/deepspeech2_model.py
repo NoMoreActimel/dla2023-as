@@ -2,8 +2,8 @@ import numpy as np
 from torch import nn
 
 from hw_as.base import BaseModel
-from hw_as.model.deepspeech2_conv2d import DeepSpeech2Conv2d
-from hw_as.model.deepspeech2_rnn_layer import DeepSpeech2RNNLayer
+from hw_as.model.DeepSpeech2.deepspeech2_conv2d import DeepSpeech2Conv2d
+from hw_as.model.DeepSpeech2.deepspeech2_rnn_layer import DeepSpeech2RNNLayer
 
 
 class DeepSpeech2Model(BaseModel):
