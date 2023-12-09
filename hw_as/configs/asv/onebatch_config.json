@@ -19,7 +19,7 @@
     },
     "data": {
       "train": {
-        "batch_size": 32,
+        "batch_size": 10,
         "num_workers": 5,
         "datasets": [
           {
@@ -27,13 +27,14 @@
             "args": {
               "data_dir": "/kaggle/input/asvpoof-2019-dataset",
               "part": "train.trn",
-              "max_audio_length": 64000
+              "max_audio_length": 64000,
+              "max_index_length": 10
             }
           }
         ]
       },
       "val": {
-        "batch_size": 32,
+        "batch_size": 10,
         "num_workers": 5,
         "datasets": [
           {
@@ -41,13 +42,14 @@
             "args": {
               "data_dir": "/kaggle/input/asvpoof-2019-dataset",
               "part": "dev.trl",
-              "max_audio_length": 64000
+              "max_audio_length": 64000,
+              "max_index_length": 10
             }
           }
         ]
       },
       "test": {
-        "batch_size": 32,
+        "batch_size": 10,
         "num_workers": 5,
         "datasets": [
           {
@@ -55,7 +57,8 @@
             "args": {
               "data_dir": "/kaggle/input/asvpoof-2019-dataset",
               "part": "eval.trl",
-              "max_audio_length": 64000
+              "max_audio_length": 64000,
+              "max_index_length": 10
             }
           }
         ]
