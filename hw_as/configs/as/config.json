@@ -25,7 +25,7 @@
           {
             "type": "ASVspoofDataset",
             "args": {
-              "data_dir": "/content/dla2023-nv/avspoof-2019-dataset",
+              "data_dir": "/kaggle/input/avspoof-2019-dataset",
               "part": "train.trn"
             }
           }
@@ -38,7 +38,7 @@
           {
             "type": "ASVspoofDataset",
             "args": {
-              "data_dir": "/content/dla2023-nv/avspoof-2019-dataset",
+              "data_dir": "/kaggle/input/avspoof-2019-dataset",
               "part": "dev.trl"
             }
           }
@@ -51,7 +51,7 @@
           {
             "type": "ASVspoofDataset",
             "args": {
-              "data_dir": "/content/dla2023-nv/avspoof-2019-dataset",
+              "data_dir": "/kaggle/input/avspoof-2019-dataset",
               "part": "eval.trl"
             }
           }
