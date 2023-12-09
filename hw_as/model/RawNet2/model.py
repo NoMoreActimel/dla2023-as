@@ -36,6 +36,7 @@ class RawNet2Model(nn.Module):
         self.gru_layers = nn.Sequential(
             nn.BatchNorm1d(self.channels[1]),
             nn.LeakyReLU(),
+            TransposeForGRU(),
             nn.GRU(
                 input_size=self.channels[1],
                 hidden_size=self.gru_hidden_size,
@@ -48,7 +49,11 @@ class RawNet2Model(nn.Module):
     def forward(self, wav, **kwargs):
         output = self.sinc_filter(wav)
         output = self.resblocks(output)
-        output = output.transpose(1, 2)
         gru_output, gru_hidden_state = self.gru_layers(output)
         predict = self.fc(gru_hidden_state[-1])
         return predict
+
+class TransposeForGRU(nn.Module):
+    def forward(self, input):
+        return input.transpose(1, 2)
+    
