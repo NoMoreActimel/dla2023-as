@@ -4,6 +4,21 @@ This is a repository with the as homework of the HSE DLA Course. It includes the
 
 ## Installation guide
 
+We will use ASVspoof2019 kaggle dataset: https://www.kaggle.com/datasets/awsaf49/asvpoof-2019-dataset. To install it, first of all download kaggle package with pip and load your kaggle.json file:
+```shell
+pip install -q kaggle
+mkdir -p ~/.kaggle
+cp kaggle.json ~/.kaggle/
+chmod 600 ~/.kaggle/kaggle.json
+```
+
+Download dataset to data_dir provided in config file:
+```shell
+cd path/to/data/dir
+kaggle datasets download -d awsaf49/asvpoof-2019-dataset
+unzip avspoof-2019-dataset
+```
+
 Clone the repository:
 ```shell
 %cd local/cloned/project/path

@@ -1,10 +1,12 @@
 import json
+import numpy as np
+import pandas as pd
+import torch
+
 from collections import OrderedDict
 from itertools import repeat
 from pathlib import Path
 
-import pandas as pd
-import torch
 
 ROOT_PATH = Path(__file__).absolute().resolve().parent.parent.parent
 
@@ -53,6 +55,12 @@ def prepare_device(n_gpu_use):
     device = torch.device("cuda:0" if n_gpu_use > 0 else "cpu")
     list_ids = list(range(n_gpu_use))
     return device, list_ids
+
+
+def get_number_of_parameters(model):
+    module_parameters = filter(lambda p: p.requires_grad, model.parameters())
+    params = sum([np.prod(p.size()) for p in module_parameters])
+    return params
 
 
 class MetricTracker:

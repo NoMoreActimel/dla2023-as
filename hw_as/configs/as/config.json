@@ -1,0 +1,94 @@
+{
+    "name": "asvspoof_rawnet2",
+    "n_gpu": 1,
+    "augmentations": {
+      "wave": [],
+      "spectrogram": []
+    },
+    "model": {
+      "type": "RawNet2Model",
+      "args": {
+        "sinc_channels": 128,
+        "sinc_filter_length": 1024,
+        "sinc_filter_min_low_hz": 0,
+        "sinc_filter_min_band_hz": 0,
+        "channels": [20, 128],
+        "GRU_hidden_size": 1024,
+        "GRU_num_layers": 3
+      }
+    },
+    "data": {
+      "train": {
+        "batch_size": 32,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "ASVspoofDataset",
+            "args": {
+              "data_dir": "/content/dla2023-nv/avspoof-2019-dataset",
+              "part": "train.trn"
+            }
+          }
+        ]
+      },
+      "val": {
+        "batch_size": 32,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "ASVspoofDataset",
+            "args": {
+              "data_dir": "/content/dla2023-nv/avspoof-2019-dataset",
+              "part": "dev.trl"
+            }
+          }
+        ]
+      },
+      "test": {
+        "batch_size": 32,
+        "num_workers": 5,
+        "datasets": [
+          {
+            "type": "ASVspoofDataset",
+            "args": {
+              "data_dir": "/content/dla2023-nv/avspoof-2019-dataset",
+              "part": "eval.trl"
+            }
+          }
+        ]
+      }
+    },
+    "optimizer": {
+      "type": "AdamW",
+      "args": {
+          "lr": 1e-4,
+          "weight_decay": 1e-4,
+          "betas": [0.9, 0.999]
+      }
+    },
+    "loss": {
+      "type": "RawNet2Loss",
+      "args": {
+        "class_weights": [1.0, 9.0]
+      }
+    },
+    "metrics": [],
+    "lr_scheduler": {
+    "type": "ExponentialLR",
+      "args": {
+        "gamma": 1.0
+      }
+    },
+    "trainer": {
+      "epochs": 5000,
+      "save_dir": "saved/",
+      "save_period": 5,
+      "verbosity": 2,
+      "monitor": "min loss",
+      "early_stop": 100,
+      "visualize": "wandb",
+      "wandb_project": "asvspoof_rawnet2_project",
+      "wandb_run_name": "test_run",
+      "len_epoch": 200
+    }
+  }

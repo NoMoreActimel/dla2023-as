@@ -11,7 +11,7 @@ import hw_as.loss as module_loss
 import hw_as.metric as module_metric
 import hw_as.model as module_arch
 from hw_as.trainer import Trainer
-from hw_as.utils import prepare_device
+from hw_as.utils import prepare_device, get_number_of_parameters
 from hw_as.utils.object_loading import get_dataloaders
 from hw_as.utils.parse_config import ConfigParser
 
@@ -32,7 +32,7 @@ def main(config):
     dataloaders = get_dataloaders(config)
 
     # build model architecture, then print to console
-    model = module_arch.HiFiGANModel(config.config)
+    model = module_arch.RawNet2Model(config.config["model"])
     logger.info(model)
 
     # prepare for (multi-device) GPU training
@@ -41,21 +41,14 @@ def main(config):
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
     
-    for module_name, n_params in model.get_number_of_parameters().items():
-        print(f"Number of {module_name} parameters: {n_params}")
+    print(f"Number of model parameters: {get_number_of_parameters(model)}")
 
     # get function handles of loss and metrics
-    criterion = {
-        "generator": config.init_obj(
-            config["loss"]["generator"],
-            module_loss,
-            mel_generator=dataloaders["train"].dataset.melspec_generator
-        ).to(device),
-        "discriminator": config.init_obj(
-            config["loss"]["discriminator"],
-            module_loss
-        ).to(device)
-    }
+    criterion = config.init_obj(
+        config["loss"],
+        module_loss
+    ).to(device)
+    
     metrics = [
         config.init_obj(metric_dict, module_metric, text_encoder=None)
         for metric_dict in config["metrics"]
@@ -63,34 +56,17 @@ def main(config):
 
     # build optimizer, learning rate scheduler. delete every line containing lr_scheduler for
     # disabling scheduler
-    generator_params = model.generator.parameters()
-    discriminator_params = chain(model.MPD.parameters(), model.MSD.parameters())
 
-    optimizer = {
-        "generator": config.init_obj(
-            config["optimizer"]["generator"],
-            torch.optim,
-            generator_params
-        ),
-        "discriminator": config.init_obj(
-            config["optimizer"]["discriminator"],
-            torch.optim,
-            discriminator_params
-        )
-    }
-
-    lr_scheduler = {
-        "generator": config.init_obj(
-            config["lr_scheduler"]["generator"],
-            torch.optim.lr_scheduler,
-            optimizer["generator"]
-        ),
-        "discriminator": config.init_obj(
-            config["lr_scheduler"]["discriminator"],
-            torch.optim.lr_scheduler,
-            optimizer["discriminator"]
-        )
-    }
+    optimizer = config.init_obj(
+        config["optimizer"],
+        torch.optim,
+        model.parameters()
+    )
+    lr_scheduler = config.init_obj(
+        config["lr_scheduler"],
+        torch.optim.lr_scheduler,
+        optimizer
+    )
 
     trainer = Trainer(
         model,

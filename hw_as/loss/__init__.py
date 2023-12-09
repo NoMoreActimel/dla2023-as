@@ -3,6 +3,7 @@ from hw_as.loss.SpExPlusLoss import SpExPlusLoss
 from hw_as.loss.FastSpeech2Loss import FastSpeech2Loss
 from hw_as.loss.HiFiGANLoss import HiFiGANGeneratorLoss
 from hw_as.loss.HiFiGANLoss import HiFiGANDiscriminatorLoss
+from hw_as.loss.RawNet2Loss import RawNet2Loss
 
 
 __all__ = [
@@ -10,5 +11,6 @@ __all__ = [
     "SpExPlusLoss",
     "FastSpeech2Loss",
     "HiFiGANGeneratorLoss",
-    "HiFiGANDiscriminatorLoss"
+    "HiFiGANDiscriminatorLoss",
+    "RawNet2Loss"
 ]

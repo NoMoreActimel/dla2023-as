@@ -6,6 +6,7 @@ from hw_as.datasets.common_voice import CommonVoiceDataset
 from hw_as.datasets.mixed_librispeech_dataset import LibrispeechMixedDataset
 from hw_as.datasets.tts import LJspeechFastSpeech2Dataset
 from hw_as.datasets.nv import LJspeechMelDataset
+from hw_as.datasets.asv import ASVspoofDataset
 
 __all__ = [
     "LibrispeechDataset",
@@ -15,5 +16,6 @@ __all__ = [
     "CommonVoiceDataset",
     "LibrispeechMixedDataset",
     "LJspeechFastSpeech2Dataset",
-    "LJspeechMelDataset"
+    "LJspeechMelDataset",
+    "ASVspoofDataset"
 ]
