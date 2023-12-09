@@ -1,6 +1,6 @@
 from torch import nn
 
-from layers import SincFilter, ResBlock
+from hw_as.model.RawNet2.layers import SincFilter, ResBlock
 
 class RawNet2Model(nn.Module):
     def __init__(self, model_config):

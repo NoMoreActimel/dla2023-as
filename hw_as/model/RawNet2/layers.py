@@ -2,7 +2,7 @@ import torch
 
 from torch import nn
 
-from sincconv import SincConv_fast
+from hw_as.model.RawNet2.sincconv import SincConv_fast
 
 
 class SincFilter(nn.Module):
