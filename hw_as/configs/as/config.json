@@ -26,7 +26,9 @@
             "type": "ASVspoofDataset",
             "args": {
               "data_dir": "/kaggle/input/avspoof-2019-dataset",
-              "part": "train.trn"
+              "part": "train.trn",
+              "max_audio_length": 64000,
+              "max_index_length": 10
             }
           }
         ]
@@ -39,7 +41,9 @@
             "type": "ASVspoofDataset",
             "args": {
               "data_dir": "/kaggle/input/avspoof-2019-dataset",
-              "part": "dev.trl"
+              "part": "dev.trl",
+              "max_audio_length": 64000,
+              "max_index_length": 10
             }
           }
         ]
@@ -52,7 +56,9 @@
             "type": "ASVspoofDataset",
             "args": {
               "data_dir": "/kaggle/input/avspoof-2019-dataset",
-              "part": "eval.trl"
+              "part": "eval.trl",
+              "max_audio_length": 64000,
+              "max_index_length": 10
             }
           }
         ]
@@ -80,7 +86,7 @@
       }
     },
     "trainer": {
-      "epochs": 5000,
+      "epochs": 100,
       "save_dir": "saved/",
       "save_period": 5,
       "verbosity": 2,
@@ -89,6 +95,7 @@
       "visualize": "wandb",
       "wandb_project": "asvspoof_rawnet2_project",
       "wandb_run_name": "test_run",
-      "len_epoch": 200
+      "len_epoch": 100,
+      "grad_norm_clip": 10
     }
   }
