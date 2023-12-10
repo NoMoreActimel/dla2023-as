@@ -76,6 +76,8 @@ class MetricTracker:
     def update(self, key, value, n=1):
         # if self.writer is not None:
         #     self.writer.add_scalar(key, value)
+        if value is None or not torch.is_tensor(value) and np.isnan(value):
+            return
         self._data.total[key] += value * n
         self._data.counts[key] += n
         self._data.average[key] = self._data.total[key] / self._data.counts[key]

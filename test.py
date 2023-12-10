@@ -1,5 +1,6 @@
 import argparse
 import json
+import numpy as np
 import os
 from pathlib import Path
 
@@ -7,11 +8,13 @@ import torch
 from tqdm import tqdm
 
 import hw_as.loss as module_loss
-import hw_as.model as module_model
+import hw_as.model as module_arch
+
+from hw_as.metric.eer_metric import EERMetric
 from hw_as.utils import ROOT_PATH
+from hw_as.utils import prepare_device, get_number_of_parameters
 from hw_as.utils.object_loading import get_dataloaders
 from hw_as.utils.parse_config import ConfigParser
-from inference import run_inference
 
 DEFAULT_CHECKPOINT_PATH = ROOT_PATH / "default_test_model" / "checkpoint.pth"
 
@@ -25,46 +28,48 @@ def main(config):
     # setup data_loader instances
     dataloaders = get_dataloaders(config)
 
-    # build model architecture
-    model = module_model.HiFiGANModel(config.config)
+    # build model architecture, then print to console
+    model = module_arch.RawNet2Model(config.config["model"]["args"])
     logger.info(model)
 
     logger.info("Loading checkpoint: {} ...".format(config.resume))
     checkpoint = torch.load(config.resume, map_location=device)
     state_dict = checkpoint["state_dict"]
-    if config["n_gpu"] > 1:
-        model = torch.nn.DataParallel(model)
     model.load_state_dict(state_dict)
-
-    # prepare model for testing
+    
+    # prepare for (multi-device) GPU training
+    device, device_ids = prepare_device(config["n_gpu"])
     model = model.to(device)
+    if len(device_ids) > 1:
+        model = torch.nn.DataParallel(model, device_ids=device_ids)
 
-    criterion = {
-        "generator": config.init_obj(
-            config["loss"]["generator"],
-            module_loss,
-            mel_generator=dataloaders["train"].dataset.melspec_generator
-        ).to(device),
-        "discriminator": config.init_obj(
-            config["loss"]["discriminator"],
-            module_loss
-        ).to(device)
-    }
     
-    run_inference(
-        model=model,
-        dataset=dataloaders["val"].dataset,
-        indices=[30, 40, 50],
-        dataset_type="val",
-        inference_path="data/datasets/ljspeech/inference",
-        compute_losses=True,
-        output_loss_filepath="output.json",
-        criterion=criterion,
-        epoch=None
-    )
+    print(f"Number of model parameters: {get_number_of_parameters(model)}")
+
+    # get function handles of loss and metrics
+    criterion = config.init_obj(config["loss"], module_loss).to(device)
     
-    print(f"Generation results written into data/datasets/ljspeech/inference/val folder")
-    print(f"Losses in output.json")
+    metric = EERMetric()
+
+    len_epoch = config["trainer"].get("len_epoch", None)
+    losses = []
+    EERs = []
+    
+    model.eval()
+    with torch.no_grad():
+        for batch in tqdm(dataloaders["test"], desc="test", total=len_epoch):
+            for tensor_for_gpu in ["wav", "target"]:
+                batch[tensor_for_gpu] = batch[tensor_for_gpu].to(device)
+            batch["predict"] = model(**batch)
+            losses.append(criterion(**batch).item())
+            EERs.append(metric(**batch))
+
+    loss = np.mean(losses)
+    EER = np.nanmean(EERs)
+
+    print(f"Cross-Entropy loss on test: {loss}")
+    print(f"EER on test: {EER}")            
+    
 
 if __name__ == "__main__":
     args = argparse.ArgumentParser(description="PyTorch Template")
@@ -99,14 +104,14 @@ if __name__ == "__main__":
     args.add_argument(
         "-b",
         "--batch-size",
-        default=5,
+        default=None,
         type=int,
         help="Test dataset batch size",
     )
     args.add_argument(
         "-j",
         "--jobs",
-        default=1,
+        default=None,
         type=int,
         help="Number of workers for test dataloader",
     )
@@ -133,7 +138,7 @@ if __name__ == "__main__":
         test_data_folder = Path(args.test_data_folder).absolute().resolve()
         assert test_data_folder.exists()
         config.config["data"] = {
-            "val": {
+            "test": {
                 "batch_size": args.batch_size,
                 "num_workers": args.jobs,
                 "datasets": [
@@ -150,8 +155,11 @@ if __name__ == "__main__":
             }
         }
 
-    assert config.config.get("data", {}).get("val", None) is not None
-    config["data"]["val"]["batch_size"] = args.batch_size
-    config["data"]["val"]["n_jobs"] = args.jobs
+    assert config.config.get("data", {}).get("test", None) is not None, \
+        f"No test dataset provided!"
+    if args.batch_size is not None:
+        config["data"]["test"]["batch_size"] = args.batch_size
+    if args.jobs is not None:
+        config["data"]["test"]["n_jobs"] = args.jobs
 
     main(config)

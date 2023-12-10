@@ -50,7 +50,7 @@ def main(config):
     ).to(device)
     
     metrics = [
-        config.init_obj(metric_dict, module_metric, text_encoder=None)
+        config.init_obj(metric_dict, module_metric)
         for metric_dict in config["metrics"]
     ]
 

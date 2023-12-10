@@ -138,7 +138,8 @@ class Trainer(BaseTrainer):
 
                 self.writer.add_scalar("learning rate", last_lr)
                 
-                self._log_scalars(batch["predict"], "bonifide_predict")
+                self._log_number(batch["predict"][0, 1], "bonifide_predict")
+                self._log_number(batch["target"][0], "bonifide_target")
                 self._log_audio(batch["wav"].squeeze(1)[0], "audio")
                 self._log_scalars(self.train_metrics)
                 # we don't want to reset train metrics at the start of every epoch
@@ -242,3 +243,9 @@ class Trainer(BaseTrainer):
             return
         for metric_name in metric_tracker.keys():
             self.writer.add_scalar(f"{metric_name}", metric_tracker.avg(metric_name))
+
+    def _log_number(self, number, name):
+        s = f'{number}'
+        if isinstance(number, float):
+            s = f'{number:.3f}'
+        self.writer.add_text(name, s)

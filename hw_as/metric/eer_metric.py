@@ -7,16 +7,17 @@ from hw_as.base.base_metric import BaseMetric
 
 
 class EERMetric(BaseMetric):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.compute_on_train = True
     
     def __call__(self, predict, target, **kwargs):
+        predict = predict[:, 1].detach().cpu().numpy()
+        target = target.detach().cpu().numpy()
         bonafide_mask = target == 1
-        return compute_eer(predict[bonafide_mask], target[~bonafide_mask])[0]
-
+        return compute_eer(predict[bonafide_mask], predict[~bonafide_mask])[0]
 
 def compute_det_curve(target_scores, nontarget_scores):
-
     n_scores = target_scores.size + nontarget_scores.size
     all_scores = np.concatenate((target_scores, nontarget_scores))
     labels = np.concatenate(
