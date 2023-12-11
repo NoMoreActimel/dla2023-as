@@ -58,8 +58,8 @@ class Trainer(BaseTrainer):
         self.log_step = 50
 
         self.train_metrics = MetricTracker(
-            "train_loss", "train_grad_norm",
-            *[f"train_{m.name}" for m in self.metrics if self._compute_on_train(m)],
+            "loss", "grad_norm",
+            *[m.name for m in self.metrics if self._compute_on_train(m)],
             writer=self.writer
         )
         self.evaluation_metrics = {
@@ -145,7 +145,10 @@ class Trainer(BaseTrainer):
                 self._log_scalars(self.train_metrics)
                 # we don't want to reset train metrics at the start of every epoch
                 # because we are interested in recent train metrics
-                last_train_metrics = self.train_metrics.result()
+                last_train_metrics = {
+                    f"train_{name}": value
+                    for name, value in self.train_metrics.result().items()
+                }
                 self.train_metrics.reset()
 
             if batch_idx >= self.len_epoch:
