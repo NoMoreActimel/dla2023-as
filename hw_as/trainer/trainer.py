@@ -58,8 +58,8 @@ class Trainer(BaseTrainer):
         self.log_step = 50
 
         self.train_metrics = MetricTracker(
-            "loss", "grad_norm",
-            *[m.name for m in self.metrics if self._compute_on_train(m)],
+            "train_loss", "train_grad_norm",
+            *[f"train_{m.name}" for m in self.metrics if self._compute_on_train(m)],
             writer=self.writer
         )
         self.evaluation_metrics = {
@@ -170,19 +170,24 @@ class Trainer(BaseTrainer):
         :return: A log that contains information about validation
         """
         self.model.eval()
-        self.evaluation_metrics.reset()
 
         with torch.no_grad():
             for part, loader in self.evaluation_dataloaders.items():
-                for batch in tqdm(loader, desc=part, total=self.len_epoch):
+                self.evaluation_metrics[part].reset()
+                for batch_idx, batch in enumerate(tqdm(loader, desc=part, total=self.len_epoch)):
                     batch = self.process_batch(
                         batch, is_train=False,
                         metrics_tracker=self.evaluation_metrics[part]
                     )
+                    if batch_idx >= self.len_epoch:
+                        break
 
                 self.writer.set_step(epoch * self.len_epoch, part)
                 self._log_scalars(self.evaluation_metrics[part])
+                self._log_number(batch["predict"][0, 1], f"{part}_bonifide_predict")
+                self._log_number(batch["target"][0], f"{part}_bonifide_target")
                 self._log_audio(batch["wav"].squeeze(1)[0], f"{part}_audio")
+
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
