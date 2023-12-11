@@ -45,7 +45,6 @@ class Trainer(BaseTrainer):
         self.text_encoder = text_encoder
         self.config = config
         self.train_dataloader = dataloaders["train"]
-        self.val_dataloader = dataloaders["val"]
 
         if len_epoch is None:
             # epoch-based training
@@ -63,11 +62,13 @@ class Trainer(BaseTrainer):
             *[m.name for m in self.metrics if self._compute_on_train(m)],
             writer=self.writer
         )
-        self.val_metrics = MetricTracker(
-            "loss",
-            *[m.name for m in self.metrics],
-            writer=self.writer
-        )
+        self.evaluation_metrics = {
+            k: MetricTracker(
+                "loss",
+                *[m.name for m in self.metrics],
+                writer=self.writer
+            ) for k in self.evaluation_dataloaders
+        }
 
     @staticmethod
     def _compute_on_train(metric):
@@ -155,6 +156,10 @@ class Trainer(BaseTrainer):
                 self.lr_scheduler.step()
         
         log = last_train_metrics
+
+        for part, val_log in self._evaluation_epoch(epoch).items():
+            log.update(**{f"{part}_{name}": value for name, value in val_log.items()})
+
         return log
 
     def _evaluation_epoch(self, epoch):
@@ -168,21 +173,25 @@ class Trainer(BaseTrainer):
         self.evaluation_metrics.reset()
 
         with torch.no_grad():
-            for batch_idx, batch in tqdm(enumerate(self.val_dataloader), desc="val", total=self.len_epoch):
-                batch = self.process_batch(
-                    batch, is_train=False, metrics_tracker=self.val_metrics
-                )
+            for part, loader in self.evaluation_dataloaders.items():
+                for batch in tqdm(loader, desc=part, total=self.len_epoch):
+                    batch = self.process_batch(
+                        batch, is_train=False,
+                        metrics_tracker=self.evaluation_metrics[part]
+                    )
 
-        self.writer.set_step(epoch * self.len_epoch, "val")
-        self._log_scalars(self.val_metrics)
-        self._log_audio(batch["wav"].squeeze(1)[0], "val_audio")
+                self.writer.set_step(epoch * self.len_epoch, part)
+                self._log_scalars(self.evaluation_metrics[part])
+                self._log_audio(batch["wav"].squeeze(1)[0], f"{part}_audio")
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
             self.writer.add_histogram(name, p, bins="auto")
         
-        return self.val_metrics.result()
-
+        return {
+            part: self.evaluation_metrics[part].result()
+            for part in self.evaluation_dataloaders
+        }
 
     def process_batch(self, batch, is_train: bool, metrics_tracker: MetricTracker):
         batch = self.move_batch_to_device(batch, self.device)
