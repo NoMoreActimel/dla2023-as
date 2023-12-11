@@ -46,6 +46,11 @@ class Trainer(BaseTrainer):
         self.text_encoder = text_encoder
         self.config = config
         self.train_dataloader = dataloaders["train"]
+        self.evaluation_dataloaders = {
+            part: loader
+            for part, loader in dataloaders.items()
+            if part != "train"
+        }
 
         if len_epoch is None:
             # epoch-based training
@@ -53,10 +58,13 @@ class Trainer(BaseTrainer):
         else:
             # iteration-based training
             self.train_dataloader = inf_loop(self.train_dataloader)
+            self.evaluation_dataloaders = {
+                part: inf_loop(loader)
+                for part, loader in self.evaluation_dataloaders.items()
+            }
             self.len_epoch = len_epoch
             self.len_val_epoch = len_val_epoch
         
-        self.evaluation_dataloaders = {k: v for k, v in dataloaders.items() if k != "train"}
         self.log_step = 50
 
         self.train_metrics = MetricTracker(
@@ -65,11 +73,11 @@ class Trainer(BaseTrainer):
             writer=self.writer
         )
         self.evaluation_metrics = {
-            k: MetricTracker(
-                "loss",
-                *[m.name for m in self.metrics],
+            part: MetricTracker(
+                f"{part}_loss",
+                *[f"{part}_{m.name}" for m in self.metrics],
                 writer=self.writer
-            ) for k in self.evaluation_dataloaders
+            ) for part in self.evaluation_dataloaders
         }
 
     @staticmethod
@@ -140,7 +148,7 @@ class Trainer(BaseTrainer):
                     last_lr = self.lr_scheduler.get_last_lr()[0]
 
                 self.writer.add_scalar("learning rate", last_lr)
-                
+
                 self._log_number(batch["predict"][0, 1], "bonifide_predict")
                 self._log_number(batch["target"][0], "bonifide_target")
                 self._log_audio(batch["wav"].squeeze(1)[0], "audio")
@@ -187,7 +195,7 @@ class Trainer(BaseTrainer):
                     if batch_idx >= self.len_val_epoch:
                         break
 
-                self.writer.set_step(epoch * self.len_val_epoch, part)
+                self.writer.set_step(epoch * self.len_epoch, part)
                 self._log_scalars(self.evaluation_metrics[part])
                 self._log_number(batch["predict"][0, 1], f"{part}_bonifide_predict")
                 self._log_number(batch["target"][0], f"{part}_bonifide_target")
