@@ -70,8 +70,8 @@ class Trainer(BaseTrainer):
         self.log_step = 50
 
         self.train_metrics = MetricTracker(
-            "loss", "grad_norm",
-            *[m.name for m in self.metrics if self._compute_on_train(m)],
+            "train_loss", "train_grad_norm",
+            *[f"train_{m.name}" for m in self.metrics if self._compute_on_train(m)],
             writer=self.writer
         )
         self.evaluation_metrics = {
@@ -119,8 +119,7 @@ class Trainer(BaseTrainer):
         ):
             try:
                 batch = self.process_batch(
-                    batch,
-                    is_train=True,
+                    batch, is_train=True, part="train",
                     metrics_tracker=self.train_metrics,
                 )
             except RuntimeError as e:
@@ -191,7 +190,7 @@ class Trainer(BaseTrainer):
                 self.evaluation_metrics[part].reset()
                 for batch_idx, batch in enumerate(tqdm(loader, desc=part, total=self.len_val_epoch)):
                     batch = self.process_batch(
-                        batch, is_train=False,
+                        batch, is_train=False, part=part,
                         metrics_tracker=self.evaluation_metrics[part]
                     )
                     if batch_idx >= self.len_val_epoch:
@@ -213,7 +212,7 @@ class Trainer(BaseTrainer):
             for part in self.evaluation_dataloaders
         }
 
-    def process_batch(self, batch, is_train: bool, metrics_tracker: MetricTracker):
+    def process_batch(self, batch, is_train: bool, part: str, metrics_tracker: MetricTracker):
         batch = self.move_batch_to_device(batch, self.device)
 
         batch["predict"] = self.model(**batch)
@@ -222,16 +221,16 @@ class Trainer(BaseTrainer):
             self.optimizer.zero_grad()
 
         batch["loss"] = self.criterion(**batch)
-        metrics_tracker.update("loss", batch["loss"])
+        metrics_tracker.update(f"{part}_loss", batch["loss"])
     
         if is_train:
             batch["loss"].backward()
             self._clip_grad_norm(self.model)
             self.optimizer.step()
-            metrics_tracker.update("grad_norm", self.get_grad_norm())
+            metrics_tracker.update(f"{part}_grad_norm", self.get_grad_norm())
         
         for met in self.metrics:
-            metrics_tracker.update(met.name, met(**batch))
+            metrics_tracker.update(f"{part}_{met.name}", met(**batch))
         
         return batch
 
