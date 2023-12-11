@@ -35,6 +35,7 @@ class Trainer(BaseTrainer):
             text_encoder=None,
             lr_scheduler=None,
             len_epoch=None,
+            len_val_epoch=None,
             skip_oom=True,
     ):
         super().__init__(
@@ -53,6 +54,7 @@ class Trainer(BaseTrainer):
             # iteration-based training
             self.train_dataloader = inf_loop(self.train_dataloader)
             self.len_epoch = len_epoch
+            self.len_val_epoch = len_val_epoch
         
         self.evaluation_dataloaders = {k: v for k, v in dataloaders.items() if k != "train"}
         self.log_step = 50
@@ -177,15 +179,15 @@ class Trainer(BaseTrainer):
         with torch.no_grad():
             for part, loader in self.evaluation_dataloaders.items():
                 self.evaluation_metrics[part].reset()
-                for batch_idx, batch in enumerate(tqdm(loader, desc=part, total=self.len_epoch)):
+                for batch_idx, batch in enumerate(tqdm(loader, desc=part, total=self.len_val_epoch)):
                     batch = self.process_batch(
                         batch, is_train=False,
                         metrics_tracker=self.evaluation_metrics[part]
                     )
-                    if batch_idx >= self.len_epoch:
+                    if batch_idx >= self.len_val_epoch:
                         break
 
-                self.writer.set_step(epoch * self.len_epoch, part)
+                self.writer.set_step(epoch * self.len_val_epoch, part)
                 self._log_scalars(self.evaluation_metrics[part])
                 self._log_number(batch["predict"][0, 1], f"{part}_bonifide_predict")
                 self._log_number(batch["target"][0], f"{part}_bonifide_target")

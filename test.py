@@ -36,7 +36,7 @@ def main(config):
     checkpoint = torch.load(config.resume, map_location=device)
     state_dict = checkpoint["state_dict"]
     model.load_state_dict(state_dict)
-    
+
     # prepare for (multi-device) GPU training
     device, device_ids = prepare_device(config["n_gpu"])
     model = model.to(device)
@@ -51,13 +51,14 @@ def main(config):
     
     metric = EERMetric()
 
-    len_epoch = config["trainer"].get("len_epoch", None)
+    len_val_epoch = config["trainer"].get("len_val_epoch", None)
+
     losses = []
     EERs = []
     
     model.eval()
     with torch.no_grad():
-        for batch in tqdm(dataloaders["test"], desc="test", total=len_epoch):
+        for batch in tqdm(dataloaders["test"], desc="test", total=len_val_epoch):
             for tensor_for_gpu in ["wav", "target"]:
                 batch[tensor_for_gpu] = batch[tensor_for_gpu].to(device)
             batch["predict"] = model(**batch)

@@ -68,6 +68,8 @@ def main(config):
         optimizer
     )
 
+    len_epoch = config["trainer"].get("len_epoch", None)
+    len_val_epoch = config["trainer"].get("len_val_epoch", len_epoch)
     trainer = Trainer(
         model,
         criterion,
@@ -77,7 +79,8 @@ def main(config):
         device=device,
         dataloaders=dataloaders,
         lr_scheduler=lr_scheduler,
-        len_epoch=config["trainer"].get("len_epoch", None)
+        len_epoch=len_epoch,
+        len_val_epoch=len_val_epoch
     )
 
     trainer.train()
