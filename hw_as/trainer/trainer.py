@@ -9,7 +9,6 @@ import torch
 import numpy as np
 import torch.nn.functional as F
 
-from torch import nn
 from torch.nn.utils import clip_grad_norm_
 from torch.optim.lr_scheduler import ReduceLROnPlateau 
 from torchvision.transforms import ToTensor
@@ -150,7 +149,7 @@ class Trainer(BaseTrainer):
 
                 self.writer.add_scalar("learning rate", last_lr)
 
-                self._log_number(nn.Softmax(batch["predict"][0, 1]), "bonifide_predict")
+                self._log_number(F.softmax(batch["predict"][0, 1]), "bonifide_predict")
                 self._log_number(batch["target"][0], "bonifide_target")
                 self._log_audio(batch["wav"].squeeze(1)[0], "audio")
                 self._log_scalars(self.train_metrics)
@@ -198,7 +197,7 @@ class Trainer(BaseTrainer):
 
                 self.writer.set_step(epoch * self.len_epoch, part)
                 self._log_scalars(self.evaluation_metrics[part])
-                self._log_number(nn.Softmax(batch["predict"][0, 1]), f"{part}_bonifide_predict")
+                self._log_number(F.softmax(batch["predict"][0, 1]), f"{part}_bonifide_predict")
                 self._log_number(batch["target"][0], f"{part}_bonifide_target")
                 self._log_audio(batch["wav"].squeeze(1)[0], f"{part}_audio")
 
