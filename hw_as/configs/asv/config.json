@@ -97,7 +97,8 @@
       "visualize": "wandb",
       "wandb_project": "asvspoof_rawnet2_project",
       "wandb_run_name": "test_run",
-      "len_epoch": 100,
+      "len_epoch": 1000,
+      "len_val_epoch": 100,
       "grad_norm_clip": 10
     }
   }

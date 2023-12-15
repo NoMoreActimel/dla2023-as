@@ -8,7 +8,7 @@
     "model": {
       "type": "RawNet2Model",
       "args": {
-        "sinc_channels": 128,
+        "sinc_channels": 20,
         "sinc_filter_length": 1024,
         "sinc_filter_min_low_hz": 0,
         "sinc_filter_min_band_hz": 0,
