@@ -58,18 +58,22 @@ def main(config):
     
     model.eval()
     with torch.no_grad():
-        for batch in tqdm(dataloaders["test"], desc="test", total=len_val_epoch):
+        for batch_idx, batch in tqdm(enumerate(dataloaders["test"]), desc="test", total=len_val_epoch):
             for tensor_for_gpu in ["wav", "target"]:
                 batch[tensor_for_gpu] = batch[tensor_for_gpu].to(device)
             batch["predict"] = model(**batch)
             losses.append(criterion(**batch).item())
             EERs.append(metric(**batch))
+            if batch_idx >= len_val_epoch:
+                break
 
     loss = np.mean(losses)
     EER = np.nanmean(EERs)
+    count_nan_EERs = np.count_nonzero(~np.isnan(EERs))
 
     print(f"Cross-Entropy loss on test: {loss}")
-    print(f"EER on test: {EER}")            
+    print(f"EER on test: {EER}")
+    print(f"Number of NaN EERs: {count_nan_EERs}")
     
 
 if __name__ == "__main__":
