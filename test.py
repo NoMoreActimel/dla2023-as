@@ -51,7 +51,7 @@ def main(config):
     
     metric = EERMetric()
 
-    len_val_epoch = config["trainer"].get("len_val_epoch", None)
+    len_val_epoch = config["trainer"].get("len_val_epoch", len(dataloaders["test"]))
 
     losses = []
     EERs = []
