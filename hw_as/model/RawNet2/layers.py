@@ -40,7 +40,8 @@ class ResBlock(nn.Module):
                 in_channels,
                 in_channels,
                 kernel_size,
-                padding=kernel_size // 2
+                padding=kernel_size // 2,
+                bias=False
             ),
             nn.BatchNorm1d(in_channels),
             nn.LeakyReLU(leakyrelu_slope),
@@ -48,14 +49,21 @@ class ResBlock(nn.Module):
                 in_channels,
                 out_channels,
                 kernel_size,
-                padding=kernel_size // 2
-            ),
+                padding=kernel_size // 2,
+                bias=False
+            )
+        )
+        self.skip_conv = nn.Conv1d(in_channels, out_channels, 1, bias=False)
+        self.out_layers = nn.Sequential(
             nn.MaxPool1d(maxpool_kernel_size),
             FMSBlock(out_channels)
         )
 
     def forward(self, input):
-        return self.layers(input)
+        output = self.layers(input)
+        output = output + self.skip_conv(input)
+        output = self.out_layers(output)
+        return output
 
 class FMSBlock(nn.Module):
     def __init__(self, n_features):
