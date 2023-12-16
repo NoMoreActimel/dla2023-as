@@ -1,6 +1,6 @@
 # Voice Anti-spoofing Homework
 
-This is a repository with the as homework of the HSE DLA Course. It includes the implementation of FastSpeech2 model architecture and all training utilities. The training was performed on the LJSpeech dataset.
+This is a repository with the as homework of the HSE DLA Course. It includes the implementation of RawNet2 model and all training utilities. The training was performed on the ASVspoof2019 dataset, with all audios being randomly cropped to 64000 frames - 4 seconds.
 
 ## Installation guide
 
@@ -38,58 +38,24 @@ Install required packages:
 pip install -r ./requirements.txt
 ```
 
-You need to download MFA alignments for LJSpeech and WaveGlow for spec-to-wav inference. All files are stored on google drive, first install gdown:
+You may now launch training / testing of the model, specifying the config file. The default model config is given as default_test_config.json. However, you may check for other examples in hw_as/configs/asv directory.
+
+To install pretrained checkpoint, you'll need gdown:
 ```shell
 pip install gdown
+gdown --id 1sZ5c3tKO2rHOlIThZtFhnsSSPyAr4lBI
+gdown --id 1y33E-QqThpnQOxKVfRbjwuusapidzjKf
+mkdir model_checkpoint
+mv checkpoint-epoch140.pth model_checkpoint/checkpoint.pth
+mv config.json model_checkpoint/config.json
 ```
 
-You can download processed data, if you do not want to perform alignments or change something in data processing pipeline. First option is to download full-data archive, having data and raw_data in it (including initial wavs and texts).
+Now you can launch test.py. By default it measures CELoss and EER on test, limiting to len_val_epoch, specified in config.trainer. You can remove len_val_epoch, in order to test on whole test dataset.
 ```shell
-gdown --id 1J-Fv9dNxFPMlzqQMTRL_pRmciUmAd7rE
-mkdir -p {{ROOT_PATH}}/dla2023-as/data/datasets/ljspeech/
-unzip data_processed.zip
-mv content/dla2023-as/data/datasets/ljspeech/* data/datasets/ljspeech/
-```
-You can download data without initial wavs and texts, which takes much less space:
-```shell
-gdown --id 1--ZVSJlnzBvvSdC7g1b3oYKQo_IpGbgC
-mkdir -p {{ROOT_PATH}}/dla2023-as/data/datasets/ljspeech/data/
-unzip data_processed.zip
-mv content/dla2023-as/data/datasets/ljspeech/data/* data/datasets/ljspeech/data/
-```
-
-If you do not want to download all processed data, then MFA alignments are available by themselves:
-MFA alignments:
-```shell
-gdown --id 14mi82n1FxXZ0XHLKpO9DmpaFBQCkyJ-X
-unzip {{ROOT_PATH}}/LJSpeech.zip
-```
-
-Finally, you will need WaveGlow for inference:
-```shell
-gdown https://drive.google.com/u/0/uc?id=1WsibBTsuRg_SF2Z6L6NFRTT-NjEy1oTx
-mkdir -p {{ROOT_PATH}}/dla2023-as/waveglow/pretrained_model/
-mv waveglow_256channels_ljs_v2.pt {{ROOT_PATH}}/dla2023-as/waveglow/pretrained_model/waveglow_256channels.pt
-```
-
-You may now launch training / testing of the model, specifying the config file. The default model config is given as default_test_config.json. However, you may check for other examples in hw_as/configs/as directory.
-
-
-Overall, to launch pretrained model you need to download the model-checkpoint and launch the test.py:
-```shell
-gdown --id 1X1B5qX4Ojeo4u569EmhoBZEQRxcU1t0O
-gdown --id 12JkbM8smVxqiqzDIXow_ervyDqkfqv4T
-mkdir default_test_model
-mv checkpoint-epoch95.pth default_test_model/checkpoint.pth
-mv config.json default_test_model/config.json
-```
-```shell
-python test.py \
-   -c default_test_model/config.json \
-   -r default_test_model/checkpoint.pth \
-   -o test_result.json
+python test.py -c model_checkpoint/config.json -r model_checkpoint/checkpoint.pth
 ``` 
 
+The provided checkpoint hits EER of 0.0467 on the whole test dataset.
 
 ## Structure
 
@@ -99,17 +65,16 @@ All written code is located in the hw_as repository. Scripts launching training 
 
 To train the model you need to specify the config path:
 ```shell
-python3 train.py -c hw_as/configs/config_name.json
+python3 train.py -c hw_as/configs/asv/config_name.json
 ```
 If you want to proceed training process from the saved checkpoint, then:
 ```shell
-python3 train.py -c hw_as/configs/config_name.json -r saved/checkpoint/path.pth
+python3 train.py -c hw_as/configs/asv/config_name.json -r saved/checkpoint/path.pth
 ```
 
 ## Testing
 
-Some basic tests are located in hw_as/tests directory. Script to run them:
-
+To launch testing you'll need ckeckpoint having its own config in the same /saved/checkpoint/ directory. You can specify config.json by yourself, though in order to load checkpoint model architectures must be the same.
 ```shell
-python3 -m unittest discover hw_as/tests
-```
+python test.py -c hw_as/configs/asv/config_name.json -r saved/checkpoint/path.pth
+``` 
