@@ -84,10 +84,12 @@ class SincConv_fast(nn.Module):
 
 
         # filter lower frequency (out_channels, 1)
-        self.low_hz_ = torch.Tensor(hz[:-1]).view(-1, 1) # fixed f1 from the paper
+        # fixed f1 from the paper
+        self.low_hz_ = nn.Parameter(torch.Tensor(hz[:-1]).view(-1, 1), requires_grad=False)
 
         # filter frequency band (out_channels, 1)
-        self.band_hz_ = torch.Tensor(np.diff(hz)).view(-1, 1) # fixed f2 (f2 = f1+diff) from the paper
+        # fixed f2 (f2 = f1+diff) from the paper
+        self.band_hz_ = nn.Parameter(torch.Tensor(np.diff(hz)).view(-1, 1), requires_grad=False)
 
         # len(g) = kernel_size
         # It is symmetric, therefore we will do computations only with left part, while creating g.
