@@ -113,6 +113,8 @@ class Trainer(BaseTrainer):
         self.train_metrics.reset()
         self.writer.add_scalar("epoch", epoch)
 
+        targets, predicts = [], []
+
         for batch_idx, batch in enumerate(
                 tqdm(self.train_dataloader, desc="train", total=self.len_epoch)
         ):
@@ -131,6 +133,9 @@ class Trainer(BaseTrainer):
                     continue
                 else:
                     raise e
+            
+            targets.extend(batch["target"].detach().cpu().tolist())
+            predicts.extend(batch["predict"].detach().cpu().tolist())
             
             # self.train_metrics.update("grad norm", self.get_grad_norm())
             if batch_idx % self.log_step == 0:
@@ -163,6 +168,15 @@ class Trainer(BaseTrainer):
 
             if batch_idx >= self.len_epoch:
                 break
+
+        targets, predicts = np.array(targets), np.array(predicts)
+        for met in self.metrics:
+            if met.name == "EERMetric":
+                self.train_metrics.update(
+                    f"train_{met.name}",
+                    met(predict=predicts, target=targets)
+                )
+        self._log_scalars(self.train_metrics)
     
         if self.lr_scheduler is not None:
             if not isinstance(self.lr_scheduler, ReduceLROnPlateau):
@@ -187,20 +201,31 @@ class Trainer(BaseTrainer):
         with torch.no_grad():
             for part, loader in self.evaluation_dataloaders.items():
                 self.evaluation_metrics[part].reset()
+                targets, predicts = [], []
+
                 for batch_idx, batch in enumerate(tqdm(loader, desc=part, total=self.len_val_epoch)):
                     batch = self.process_batch(
                         batch, is_train=False, part=part,
                         metrics_tracker=self.evaluation_metrics[part]
                     )
+                    targets.extend(batch["target"].detach().cpu().tolist())
+                    predicts.extend(batch["predict"].detach().cpu().tolist())
                     if batch_idx >= self.len_val_epoch:
                         break
 
+                targets, predicts = np.array(targets), np.array(predicts)
+                for met in self.metrics:
+                    if met.name == "EERMetric":
+                        self.evaluation_metrics[part].update(
+                            f"{part}_{met.name}",
+                            met(predict=predicts, target=targets)
+                        )
+                
                 self.writer.set_step(epoch * self.len_epoch, part)
                 self._log_scalars(self.evaluation_metrics[part])
                 self._log_number(F.softmax(batch["predict"][0, 1]), f"{part}_bonifide_predict")
                 self._log_number(batch["target"][0], f"{part}_bonifide_target")
                 self._log_audio(batch["wav"].squeeze(1)[0], f"{part}_audio")
-
 
         # add histogram of model parameters to the tensorboard
         for name, p in self.model.named_parameters():
@@ -229,7 +254,8 @@ class Trainer(BaseTrainer):
             metrics_tracker.update(f"{part}_grad_norm", self.get_grad_norm())
         
         for met in self.metrics:
-            metrics_tracker.update(f"{part}_{met.name}", met(**batch))
+            if met.name != "EERMetric":
+                metrics_tracker.update(f"{part}_{met.name}", met(**batch))
         
         return batch
 

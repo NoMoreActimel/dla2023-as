@@ -42,7 +42,6 @@ def main(config):
     model = model.to(device)
     if len(device_ids) > 1:
         model = torch.nn.DataParallel(model, device_ids=device_ids)
-
     
     print(f"Number of model parameters: {get_number_of_parameters(model)}")
 
@@ -53,8 +52,8 @@ def main(config):
 
     len_val_epoch = config["trainer"].get("len_val_epoch", len(dataloaders["test"]))
 
+    targets, predicts = [], []
     losses = []
-    EERs = []
     
     model.eval()
     with torch.no_grad():
@@ -63,17 +62,19 @@ def main(config):
                 batch[tensor_for_gpu] = batch[tensor_for_gpu].to(device)
             batch["predict"] = model(**batch)
             losses.append(criterion(**batch).item())
-            EERs.append(metric(**batch))
+            
+            targets.extend(batch["target"].detach().cpu().tolist())
+            predicts.extend(batch["predict"].detach().cpu().tolist())
+
             if batch_idx >= len_val_epoch:
                 break
 
-    loss = np.mean(losses)
-    EER = np.nanmean(EERs)
-    count_nan_EERs = np.count_nonzero(~np.isnan(EERs))
+    loss = np.mean(losses)    
+    targets, predicts = np.array(targets), np.array(predicts)
+    EER = metric(predict=predicts, target=targets)
 
     print(f"Cross-Entropy loss on test: {loss}")
     print(f"EER on test: {EER}")
-    print(f"Number of NaN EERs: {count_nan_EERs}")
     
 
 if __name__ == "__main__":
