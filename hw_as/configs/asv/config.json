@@ -14,7 +14,8 @@
         "sinc_filter_min_band_hz": 0,
         "channels": [20, 128],
         "GRU_hidden_size": 1024,
-        "GRU_num_layers": 3
+        "GRU_num_layers": 3,
+        "leakyrelu_slope": 0.3
       }
     },
     "data": {

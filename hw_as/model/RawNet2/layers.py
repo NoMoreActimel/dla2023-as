@@ -6,7 +6,8 @@ from hw_as.model.RawNet2.sincconv import SincConv_fast
 
 
 class SincFilter(nn.Module):
-    def __init__(self, sinc_channels, sinc_filter_length, min_low_hz, min_band_hz, maxpool_kernel_size=3):
+    def __init__(self, sinc_channels, sinc_filter_length, min_low_hz,
+                 min_band_hz, maxpool_kernel_size=3, leakyrelu_slope=0.3):
         super().__init__()
 
         self.sincconv = SincConv_fast(
@@ -18,7 +19,7 @@ class SincFilter(nn.Module):
         self.layers = nn.Sequential(
             nn.MaxPool1d(maxpool_kernel_size),
             nn.BatchNorm1d(sinc_channels),
-            nn.LeakyReLU()
+            nn.LeakyReLU(leakyrelu_slope)
         )
 
     def forward(self, input):
@@ -28,11 +29,12 @@ class SincFilter(nn.Module):
         return self.layers(output)
 
 class ResBlock(nn.Module):
-    def __init__(self, in_channels, out_channels, kernel_size, maxpool_kernel_size=3):
+    def __init__(self, in_channels, out_channels, kernel_size,
+                 maxpool_kernel_size=3, leakyrelu_slope=0.3):
         super().__init__()
         self.layers = nn.Sequential(
             nn.BatchNorm1d(in_channels),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(leakyrelu_slope),
             nn.Conv1d(
                 in_channels,
                 in_channels,
@@ -40,7 +42,7 @@ class ResBlock(nn.Module):
                 padding=kernel_size // 2
             ),
             nn.BatchNorm1d(in_channels),
-            nn.LeakyReLU(),
+            nn.LeakyReLU(leakyrelu_slope),
             nn.Conv1d(
                 in_channels,
                 out_channels,
@@ -53,7 +55,6 @@ class ResBlock(nn.Module):
 
     def forward(self, input):
         return self.layers(input)
-
 
 class FMSBlock(nn.Module):
     def __init__(self, n_features):
