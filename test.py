@@ -64,7 +64,7 @@ def main(config):
             losses.append(criterion(**batch).item())
             
             targets.extend(batch["target"].detach().cpu().tolist())
-            predicts.extend(batch["predict"].detach().cpu().tolist())
+            predicts.extend(batch["predict"][:, 1].detach().cpu().tolist())
 
             if batch_idx >= len_val_epoch:
                 break

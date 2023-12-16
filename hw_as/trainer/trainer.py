@@ -135,7 +135,7 @@ class Trainer(BaseTrainer):
                     raise e
             
             targets.extend(batch["target"].detach().cpu().tolist())
-            predicts.extend(batch["predict"].detach().cpu().tolist())
+            predicts.extend(batch["predict"][:, 1].detach().cpu().tolist())
             
             # self.train_metrics.update("grad norm", self.get_grad_norm())
             if batch_idx % self.log_step == 0:
@@ -209,7 +209,7 @@ class Trainer(BaseTrainer):
                         metrics_tracker=self.evaluation_metrics[part]
                     )
                     targets.extend(batch["target"].detach().cpu().tolist())
-                    predicts.extend(batch["predict"].detach().cpu().tolist())
+                    predicts.extend(batch["predict"][:, 1].detach().cpu().tolist())
                     if batch_idx >= self.len_val_epoch:
                         break
 

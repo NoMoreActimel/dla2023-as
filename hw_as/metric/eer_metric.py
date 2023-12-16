@@ -12,8 +12,6 @@ class EERMetric(BaseMetric):
         self.compute_on_train = True
     
     def __call__(self, predict, target, **kwargs):
-        predict = predict[:, 1].detach().cpu().numpy()
-        target = target.detach().cpu().numpy()
         bonafide_mask = target == 1
         return compute_eer(predict[bonafide_mask], predict[~bonafide_mask])[0]
 
