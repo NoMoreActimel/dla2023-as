@@ -6,13 +6,14 @@ from hw_as.model.RawNet2.sincconv import SincConv_fast
 
 
 class SincFilter(nn.Module):
-    def __init__(self, sinc_channels, sinc_filter_length, min_low_hz,
+    def __init__(self, sinc_channels, sinc_filter_length, sinc_filter_type, min_low_hz,
                  min_band_hz, maxpool_kernel_size=3, leakyrelu_slope=0.3):
         super().__init__()
 
         self.sincconv = SincConv_fast(
             out_channels=sinc_channels,
             kernel_size=sinc_filter_length,
+            filter_type=sinc_filter_type,
             min_low_hz=min_low_hz,
             min_band_hz=min_band_hz
         )

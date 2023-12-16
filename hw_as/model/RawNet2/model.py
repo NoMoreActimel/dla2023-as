@@ -8,6 +8,7 @@ class RawNet2Model(nn.Module):
 
         self.sinc_channels = model_config["sinc_channels"]
         self.sinc_filter_length = model_config["sinc_filter_length"]
+        self.sinc_filter_type = model_config.get("sinc_filter_type", "mel")
         self.sinc_filter_min_low_hz = model_config.get("sinc_filter_min_low_hz", 0)
         self.sinc_filter_min_band_hz = model_config.get("sinc_filter_min_band_hz", 0)
 
@@ -21,6 +22,7 @@ class RawNet2Model(nn.Module):
         self.sinc_filter = SincFilter(
             sinc_channels=self.sinc_channels,
             sinc_filter_length=self.sinc_filter_length,
+            sinc_filter_type=self.sinc_filter_type,
             min_low_hz=self.sinc_filter_min_low_hz,
             min_band_hz=self.sinc_filter_min_band_hz,
             maxpool_kernel_size=3,

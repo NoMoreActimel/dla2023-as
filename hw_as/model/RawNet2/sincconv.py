@@ -38,7 +38,7 @@ class SincConv_fast(nn.Module):
     def to_hz(mel):
         return 700 * (10 ** (mel / 2595) - 1)
 
-    def __init__(self, out_channels, kernel_size, sample_rate=16000, in_channels=1,
+    def __init__(self, out_channels, kernel_size, filter_type="mel", sample_rate=16000, in_channels=1,
                  stride=1, padding=0, dilation=1, bias=False, groups=1, min_low_hz=50, min_band_hz=50):
 
         super(SincConv_fast,self).__init__()
@@ -77,11 +77,11 @@ class SincConv_fast(nn.Module):
         # Where band_hz is (high_hz - low_hz). Therefore, it is reasonable to
         # do diff and do not set high_hz as sr/2
 
-        mel = np.linspace(self.to_mel(low_hz),
-                          self.to_mel(high_hz),
-                          self.out_channels + 1)
-        hz = self.to_hz(mel)
-
+        if filter_type == "linear":
+            hz = np.linspace(low_hz, high_hz, self.out_channels + 1)
+        if filter_type == "mel":
+            mel = np.linspace(self.to_mel(low_hz), self.to_mel(high_hz), self.out_channels + 1)
+            hz = self.to_hz(mel)
 
         # filter lower frequency (out_channels, 1)
         # fixed f1 from the paper
